@@ -23,6 +23,10 @@ usage() {
     echo "      If you want a vm named 'test' to end up in the '/machines/test' dir,";
     echo "      then you should use '/machines' as the dest dir.";
     echo "";
+    echo " WARNING!";
+    echo " Moving VMs that contain snapshots IS NOT SUPPORTED!";
+    echo " You should merge your snapshots before moving the VM.";
+    echo "";
 }
 
 
