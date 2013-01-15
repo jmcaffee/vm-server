@@ -9,8 +9,8 @@ SCRIPT_DIR="$( cd "$( dirname $(readlink -f "${BASH_SOURCE[0]}") )" && pwd )"
 
 srcvm=$1
 targetvm=$2
-vmdir=vm
-basefolder=${SCRIPT_DIR}/vm
+vmdir=../machines
+basefolder=${SCRIPT_DIR}/$vmdir
 
 usage() {
     echo "Usage: clonevm  SRC_VM_NAME  NEW_VM_NAME  [--newmac | -n]";

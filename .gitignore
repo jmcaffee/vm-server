@@ -1,0 +1,4 @@
+# vm-server project .gitignore
+#
+# Ignore nohup files
+nohup.out

@@ -1,0 +1,89 @@
+#
+# Move a VM
+#
+# Moving a VM involves the following process:
+#   Clone the VM to move-VMNAME
+#   Delete the original VM (so we can reuse the name)
+#   Clone move-VMNAME to new location
+#   Delete move-VMNAME
+#
+
+SCRIPT_DIR="$( cd "$( dirname $(readlink -f "${BASH_SOURCE[0]}") )" && pwd )"
+
+
+srcvm=$1
+destdir=$2
+
+usage() {
+    echo "Usage: clonevm  SRC_VM_NAME  DEST_DIR_ROOT";
+    echo "";
+    echo "  Surround VM name in quotes if it contains spaces.";
+    echo "  DEST_DIR_ROOT should NOT include the VM's dir name.";
+    echo "  Ex:";
+    echo "      If you want a vm named 'test' to end up in the '/machines/test' dir,";
+    echo "      then you should use '/machines' as the dest dir.";
+    echo "";
+}
+
+
+# Check for proper number of args.
+expected_args=2
+if [ $# -lt $expected_args ]
+then
+    usage
+    exit 1
+fi
+
+echo "Source VM: $srcvm"
+echo "Target dir: $destdir"
+
+tmpvm=move-$srcvm
+tmpdest=/tmp
+echo "Cloning $srcvm to $tmpvm"
+
+VBoxManage clonevm "$srcvm" --mode all --options keepallmacs --name "$tmpvm" --basefolder "$tmpdest" --register
+retval=$?
+
+if [ $retval -eq 0 ]; then
+    echo "1st clone completed"
+else
+    echo "1st clone failed. Aborting"
+    exit 1
+fi
+
+echo "Deleting original VM ($srcvm)"
+VBoxManage unregistervm "$srcvm" --delete
+retval=$?
+
+if [ $retval -eq 0 ]; then
+    echo "$srcvm deleted."
+else
+    echo "$srcvm delete failed. Aborting"
+    exit 1
+fi
+
+
+echo "Cloning $tmpvm to $srcvm"
+
+VBoxManage clonevm "$tmpvm" --mode all --options keepallmacs --name "$srcvm" --basefolder "$destdir" --register
+retval=$?
+
+if [ $retval -eq 0 ]; then
+    echo "2nd clone completed"
+else
+    echo "2nd clone failed. Aborting"
+    exit 1
+fi
+
+echo "Deleting temp VM ($tmpvm)"
+VBoxManage unregistervm "$tmpvm" --delete
+retval=$?
+
+if [ $retval -eq 0 ]; then
+    echo "$tmpvm deleted."
+else
+    echo "$tmpvm delete failed."
+    exit 1
+fi
+
+echo "Finished."
