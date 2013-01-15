@@ -1,0 +1,13 @@
+#!/bin/bash
+
+# Check for proper number of args.
+expected_args=1
+if [ $# -ne $expected_args ]
+then
+    echo "Usage:"
+    echo "    stopvm VMNAME"
+    exit 1
+fi
+
+VBoxManage controlvm "$1" savestate
+

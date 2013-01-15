@@ -1,0 +1,7 @@
+# This directory is used to store VMs. We don't want to add VMs to the repo
+# cause they are huge!
+#
+# Ignore everything in this directory
+*
+# Except this file
+!.gitignore

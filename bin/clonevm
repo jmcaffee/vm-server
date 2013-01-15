@@ -1,0 +1,57 @@
+#
+# Clone a VM
+#
+
+#SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+# The version below will return the script's dir even if called via symlink:
+SCRIPT_DIR="$( cd "$( dirname $(readlink -f "${BASH_SOURCE[0]}") )" && pwd )"
+
+
+srcvm=$1
+targetvm=$2
+basefolder=${SCRIPT_DIR}/active-vms
+
+usage() {
+    echo "Usage: clonevm  SRC_VM  NEW_VM  [--newmac | -n]";
+}
+
+
+# Check for proper number of args.
+expected_args=2
+if [ $# -lt $expected_args ]
+then
+    usage
+    exit 1
+fi
+
+if [ "$3X" == "--newmacX" ] || [ "$3X" == "-nX" ]; then
+    newmac=yes
+else
+    newmac=no
+fi
+
+echo "Source VM: $srcvm"
+echo "Target VM: $targetvm"
+echo "newmac: $newmac"
+
+if [ "$newmac" != "yes" ]; then
+    macswitch="--options keepallmacs"
+else
+    macswitch=
+fi
+echo "macswitch: $macswitch"
+
+#exit 0
+echo "Cloning $srcvm to $targetvm"
+
+VBoxManage clonevm "$srcvm" --mode all $macswitch --name "$targetvm" --basefolder "$basefolder" --register
+retval=$?
+
+if [ $retval -eq 0 ]; then
+    echo "Clone completed"
+else
+    echo "Clone failed"
+    exit 1
+fi
+
+

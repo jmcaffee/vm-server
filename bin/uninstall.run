@@ -1,0 +1,78 @@
+#!/bin/bash
+
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+LINK_DIR=/usr/local/bin
+
+#####################################
+# Function: deletescriptandlink
+#   $1: outfile
+#
+deletescriptandlink() {
+    local fname=$( basename $1 )
+    sudo rm $LINK_DIR/$fname
+    sudo rm $1
+}
+
+
+#####################################
+# runningvms
+#
+sname=runningvms
+echo "Deleting script: $sname"
+outfile=$SCRIPT_DIR/$sname
+deletescriptandlink $outfile
+
+
+#####################################
+# listvms
+#
+sname=listvms
+echo "Deleting script: $sname"
+outfile=$SCRIPT_DIR/$sname
+deletescriptandlink $outfile
+
+
+#####################################
+# startvm
+#
+sname=startvm
+echo "Deleting script: $sname"
+outfile=$SCRIPT_DIR/$sname
+deletescriptandlink $outfile
+
+
+#####################################
+# stopvm
+#
+sname=stopvm
+echo "Deleting script: $sname"
+outfile=$SCRIPT_DIR/$sname
+deletescriptandlink $outfile
+
+
+#####################################
+# deletevm
+#
+sname=deletevm
+echo "Deleting script: $sname"
+outfile=$SCRIPT_DIR/$sname
+deletescriptandlink $outfile
+
+
+#####################################
+# clonevm
+#
+sname=clonevm
+echo "Deleting script: $sname"
+outfile=$SCRIPT_DIR/$sname
+deletescriptandlink $outfile
+
+
+#####################################
+# vmstatus
+#
+sname=vmstatus
+echo "Deleting script: $sname"
+outfile=$SCRIPT_DIR/$sname
+deletescriptandlink $outfile
+
