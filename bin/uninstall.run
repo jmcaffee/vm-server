@@ -1,78 +1,28 @@
 #!/bin/bash
 
+if [ $UID -ne 0 ]; then
+    echo "This script must be run with sudo, or as root"
+    exit 65
+fi
+
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 LINK_DIR=/usr/local/bin
 
 #####################################
-# Function: deletescriptandlink
+# Function: rmlink
 #   $1: outfile
 #
-deletescriptandlink() {
+rmlink() {
     local fname=$( basename $1 )
-    sudo rm $LINK_DIR/$fname
-    sudo rm $1
+    rm -f $LINK_DIR/$fname
 }
 
 
-#####################################
-# runningvms
-#
-sname=runningvms
-echo "Deleting script: $sname"
-outfile=$SCRIPT_DIR/$sname
-deletescriptandlink $outfile
-
-
-#####################################
-# listvms
-#
-sname=listvms
-echo "Deleting script: $sname"
-outfile=$SCRIPT_DIR/$sname
-deletescriptandlink $outfile
-
-
-#####################################
-# startvm
-#
-sname=startvm
-echo "Deleting script: $sname"
-outfile=$SCRIPT_DIR/$sname
-deletescriptandlink $outfile
-
-
-#####################################
-# stopvm
-#
-sname=stopvm
-echo "Deleting script: $sname"
-outfile=$SCRIPT_DIR/$sname
-deletescriptandlink $outfile
-
-
-#####################################
-# deletevm
-#
-sname=deletevm
-echo "Deleting script: $sname"
-outfile=$SCRIPT_DIR/$sname
-deletescriptandlink $outfile
-
-
-#####################################
-# clonevm
-#
-sname=clonevm
-echo "Deleting script: $sname"
-outfile=$SCRIPT_DIR/$sname
-deletescriptandlink $outfile
-
-
-#####################################
-# vmstatus
-#
-sname=vmstatus
-echo "Deleting script: $sname"
-outfile=$SCRIPT_DIR/$sname
-deletescriptandlink $outfile
-
+echo "Removing link for..."
+for f in $SCRIPT_DIR/*
+do
+    if [[ $f != *.run ]]; then
+        echo "$f"
+        rmlink "$f"
+    fi
+done

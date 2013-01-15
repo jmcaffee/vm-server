@@ -1,5 +1,10 @@
 #!/bin/bash
 
+if [ $UID -ne 0 ]; then
+    echo "This script must be run with sudo, or as root"
+    exit 65
+fi
+
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 LINK_DIR=/usr/local/bin
 
@@ -9,231 +14,29 @@ LINK_DIR=/usr/local/bin
 #
 createlink() {
     local fname=$( basename $1 )
-    sudo ln -s $1 $LINK_DIR/$fname
+    ln -s $1 $LINK_DIR/$fname
 }
 
-
 #####################################
-# runningvms
+# Function: rmlink
+#   $1: outfile
 #
-sname=runningvms
-echo "Creating script: $sname"
-outfile=$SCRIPT_DIR/$sname
-(
-cat <<'EOF'
-#!/bin/bash
-
-VBoxManage list runningvms
-
-EOF
-) > $outfile
-chmod 755 $outfile
-createlink $outfile
-
-
-#####################################
-# listvms
-#
-sname=listvms
-echo "Creating script: $sname"
-outfile=$SCRIPT_DIR/$sname
-(
-cat <<'EOF'
-#!/bin/bash
-
-VBoxManage list vms
-
-EOF
-) > $outfile
-chmod 755 $outfile
-createlink $outfile
-
-
-#####################################
-# startvm
-#
-sname=startvm
-echo "Creating script: $sname"
-outfile=$SCRIPT_DIR/$sname
-(
-cat <<'EOF'
-#!/bin/bash
-
-# Check for proper number of args.
-expected_args=1
-if [ $# -ne $expected_args ]
-then
-    echo "Usage:"
-    echo "    startvm VMNAME"
-    exit 1
-fi
-
-nohup VBoxHeadless --startvm "$1" &
-
-echo "$1 VM started."
-EOF
-) > $outfile
-chmod 755 $outfile
-createlink $outfile
-
-
-#####################################
-# stopvm
-#
-sname=stopvm
-echo "Creating script: $sname"
-outfile=$SCRIPT_DIR/$sname
-(
-cat <<'EOF'
-#!/bin/bash
-
-# Check for proper number of args.
-expected_args=1
-if [ $# -ne $expected_args ]
-then
-    echo "Usage:"
-    echo "    stopvm VMNAME"
-    exit 1
-fi
-
-VBoxManage controlvm "$1" savestate
-
-EOF
-) > $outfile
-chmod 755 $outfile
-createlink $outfile
-
-
-#####################################
-# deletevm
-#
-sname=deletevm
-echo "Creating script: $sname"
-outfile=$SCRIPT_DIR/$sname
-(
-cat <<'EOF'
-#!/bin/bash
-
-# Check for proper number of args.
-expected_args=1
-if [ $# -ne $expected_args ]
-then
-    echo "Usage:"
-    echo "    deletevm VMNAME"
-    exit 1
-fi
-
-VBoxManage unregistervm "$1" --delete
-
-EOF
-) > $outfile
-chmod 755 $outfile
-createlink $outfile
-
-
-#####################################
-# clonevm
-#
-sname=clonevm
-echo "Creating script: $sname"
-outfile=$SCRIPT_DIR/$sname
-(
-cat <<'EOF'
-#!/bin/bash
-
-#
-# Clone a VM
-#
-
-#SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-# The version below will return the script's dir even if called via symlink:
-SCRIPT_DIR="$( cd "$( dirname $(readlink -f "${BASH_SOURCE[0]}") )" && pwd )"
-
-
-srcvm=$1
-targetvm=$2
-basefolder=${SCRIPT_DIR}/active-vms
-
-usage() {
-    echo "Usage: clonevm  SRC_VM  NEW_VM  [--newmac | -n]";
+rmlink() {
+    local fname=$( basename $1 )
+    if [ -f $LINK_DIR/$fname ]; then
+        rm -f $LINK_DIR/$fname
+    fi
 }
 
-
-# Check for proper number of args.
-expected_args=2
-if [ $# -lt $expected_args ]
-then
-    usage
-    exit 1
-fi
-
-if [ "$3X" == "--newmacX" ] || [ "$3X" == "-nX" ]; then
-    newmac=yes
-else
-    newmac=no
-fi
-
-echo "Source VM: $srcvm"
-echo "Target VM: $targetvm"
-echo "newmac: $newmac"
-
-if [ "$newmac" != "yes" ]; then
-    macswitch="--options keepallmacs"
-else
-    macswitch=
-fi
-echo "macswitch: $macswitch"
-
-#exit 0
-echo "Cloning $srcvm to $targetvm"
-
-VBoxManage clonevm "$srcvm" --mode all $macswitch --name "$targetvm" --basefolder "$basefolder" --register
-retval=$?
-
-if [ $retval -eq 0 ]; then
-    echo "Clone completed"
-else
-    echo "Clone failed"
-    exit 1
-fi
-EOF
-) > $outfile
-chmod 755 $outfile
-createlink $outfile
-
-
-#####################################
-# vmstatus
-#
-sname=vmstatus
-echo "Creating script: $sname"
-outfile=$SCRIPT_DIR/$sname
-(
-cat <<'EOF'
-#!/bin/bash
-
-vm=$1
-
-usage() {
-    echo "Usage: vmstatus  VM_NAME";
-}
-
-
-# Check for proper number of args.
-expected_args=1
-if [ $# -lt $expected_args ]
-then
-    usage
-    exit 1
-fi
-
-
-VBoxManage showvminfo "$vm"
-
-EOF
-) > $outfile
-chmod 755 $outfile
-createlink $outfile
+echo "Adding link for..."
+for f in $SCRIPT_DIR/*
+do
+    if [[ $f != *.run ]]; then
+        echo "$f"
+        rmlink "$f"
+        createlink "$f"
+    fi
+done
 
 
 

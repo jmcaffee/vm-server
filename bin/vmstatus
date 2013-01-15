@@ -4,6 +4,8 @@ vm=$1
 
 usage() {
     echo "Usage: vmstatus  VM_NAME";
+    echo "";
+    echo "  Surround VM name in quotes if it contains spaces.";
 }
 
 

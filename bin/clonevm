@@ -9,10 +9,15 @@ SCRIPT_DIR="$( cd "$( dirname $(readlink -f "${BASH_SOURCE[0]}") )" && pwd )"
 
 srcvm=$1
 targetvm=$2
-basefolder=${SCRIPT_DIR}/active-vms
+vmdir=vm
+basefolder=${SCRIPT_DIR}/vm
 
 usage() {
-    echo "Usage: clonevm  SRC_VM  NEW_VM  [--newmac | -n]";
+    echo "Usage: clonevm  SRC_VM_NAME  NEW_VM_NAME  [--newmac | -n]";
+    echo "";
+    echo "  Surround VM names in quotes if they contain spaces.";
+    echo "";
+    echo "  -n, --newmac    Generate a new MAC for the network card. Default: no";
 }
 
 
@@ -41,7 +46,6 @@ else
 fi
 echo "macswitch: $macswitch"
 
-#exit 0
 echo "Cloning $srcvm to $targetvm"
 
 VBoxManage clonevm "$srcvm" --mode all $macswitch --name "$targetvm" --basefolder "$basefolder" --register

@@ -1,13 +1,41 @@
 #!/bin/bash
 
+usage() {
+    echo "Usage: startvm  VM_NAME  [OPTION]";
+    echo "";
+    echo "  Surround VM name in quotes if it contains spaces.";
+    echo "";
+    echo "  OPTIONS";
+    echo "  -v, --vrde      Force VRDE on (Remote Desktop)";
+    echo "  -n, --no-vrde   Force VRDE off";
+    echo "            By default, VRDE setting in config will be used.";
+}
+
 # Check for proper number of args.
 expected_args=1
-if [ $# -ne $expected_args ]
+if [ $# -lt $expected_args ]
 then
-    echo "Usage:"
-    echo "    startvm VMNAME"
+    usage
     exit 1
 fi
 
-nohup VBoxHeadless --startvm "$1" &
+# Check for help
+if [ "$1X" == "--helpX" ] || [ "$1X" == "-hX" ]; then
+    usage
+    exit 1
+fi
+
+# Set default vrde option
+vrdeopt=config
+
+if [ "$2X" == "--vrdeX" ] || [ "$2X" == "-vX" ]; then
+    vrdeopt=on
+fi
+
+if [ "$2X" == "--no-vrdeX" ] || [ "$2X" == "-nX" ]; then
+    vrdeopt=off
+fi
+
+
+nohup VBoxHeadless --startvm "$1" --vrde $vrdeopt &
 

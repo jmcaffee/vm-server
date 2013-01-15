@@ -1,13 +1,36 @@
 #!/bin/bash
 
+usage() {
+    echo "Usage: stopvm  VM_NAME  [STOP_TYPE]";
+    echo "";
+    echo "  Surround VM name in quotes if it contains spaces.";
+    echo "";
+    echo "  STOP_TYPE";
+    echo "      savestate  [Default]";
+    echo "      poweroff";
+    echo "      reset";
+}
+
 # Check for proper number of args.
 expected_args=1
-if [ $# -ne $expected_args ]
+if [ $# -lt $expected_args ]
 then
-    echo "Usage:"
-    echo "    stopvm VMNAME"
+    usage
     exit 1
 fi
 
-VBoxManage controlvm "$1" savestate
+# Check for help
+if [ "$1X" == "--helpX" ] || [ "$1X" == "-hX" ]; then
+    usage
+    exit 1
+fi
+
+# Set default savetype option
+savetype=savestate
+
+if [ "$2X" != "X" ]; then
+    savetype=$2
+fi
+
+VBoxManage controlvm "$1" $savetype
 
