@@ -29,7 +29,11 @@ Summary
 -------
 
 These scripts/commands help moderate/maintain a VirtualBox Headless server
-running on Ubuntu/Debian.
+running on Ubuntu/Debian. The commands are mainly wrappers around
+VBoxManage and VBoxHeadless.
+
+Ultimately, they're so I don't have to look up the details when I come back
+to set up a new VM a month or two down the road.
 
 Within the root directory of this project a number of directories are
 created:
@@ -38,6 +42,87 @@ created:
 + isos     - keep your OS image files here
 + vmdks    - got VMDKs? Keep them here
 + bin      - all of the commands, and the un/install scripts
+
+Commands
+--------
+
+#### listvms
+
+List VMs that VBox knows about, running or not.
+
+#### runningvms
+
+List VMs that are currently running.
+
+#### vmstatus
+
+Display a VM configuration
+
+    Usage: vmstatus  VM_NAME
+
+#### startvm
+
+Start a stopped VM
+
+    Usage: startvm  VM_NAME  [OPTION]
+    
+      Surround VM name in quotes if it contains spaces.
+    
+      OPTIONS
+      -v, --vrde      Force VRDE on (Remote Desktop)
+      -n, --no-vrde   Force VRDE off
+                By default, VRDE setting in config will be used.
+
+#### stopvm
+
+Stop a running VM
+
+    Usage: stopvm  VM_NAME  [STOP_TYPE]
+    
+      Surround VM name in quotes if it contains spaces.
+    
+      STOP_TYPE
+          savestate  [Default]
+          poweroff
+          reset
+
+#### deletevm
+
+Delete a registered VM
+
+    Usage:"
+        deletevm VMNAME"
+
+#### clonevm
+
+Clone a stopped VM
+
+    Usage: clonevm  SRC_VM_NAME  NEW_VM_NAME  [--newmac | -n]
+    
+      Surround VM names in quotes if they contain spaces.
+    
+      -n, --newmac    Generate a new MAC for the network card. Default: no
+
+#### movevm
+
+Move a VM to another location (directory)
+
+    Usage: clonevm  SRC_VM_NAME  DEST_DIR_ROOT
+    
+      Surround VM name in quotes if it contains spaces.
+      DEST_DIR_ROOT should NOT include the VM's dir name.
+      Ex:
+          If you want a vm named 'test' to end up in the '/machines/test' dir,
+          then you should use '/machines' as the dest dir.
+    
+     WARNING!
+     Moving VMs that contain snapshots IS NOT SUPPORTED!
+     You should merge your snapshots before moving the VM.
+    
+
+
+
+
 
 License
 -------
