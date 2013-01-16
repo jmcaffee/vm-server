@@ -1,0 +1,27 @@
+#!/bin/bash
+
+usage() {
+cat <<EOF
+Usage: vmvrde VMNAME  on|off
+
+EOF
+}
+
+# Check for proper number of args.
+expected_args=2
+if [ $# -ne $expected_args ]
+then
+    usage
+    exit 1
+fi
+
+vmname=$1
+vrde=$2
+
+if [ "${vrde}X" != "onX" ] && [ "${vrde}X" != "offX" ]; then
+    usage
+    exit 1
+fi
+
+VBoxManage modifyvm "$1" --vrde $vrde
+

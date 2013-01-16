@@ -15,10 +15,11 @@ Usage: createvm [OPTIONS]
         -n VMNAME   Name of VM to create
         -s MEMSIZE  Size of memory in MB
         -d HDSIZE   Size of HD in MB
-        -t OSTYPE   Type of OS (Linux, Windows)
+        -t OSTYPE   Type of OS (Linux, Windows7, etc)
         -v VMDKNAME Name of VMDK to use in place of HD
 
     Options not provided as arguments will be requested.
+    Run 'VBoxManage list ostypes' for a list of available OS types.
 EOF
 }
 
@@ -93,29 +94,9 @@ EOF
 }
 
 settings
-#exit 1
 
-## Modify these variables to customize your setup:
-#
-## Set vmname to the name of your new VM.
-#vmname=test
-#
-## VM HD size (in MB; 1000 = 1 GB)
-#hdsize=3000
-#
-## Link to ISO to download.
-#isolink=http://cdimage.debian.org/debian-cd/6.0.6/i386/iso-cd/debian-6.0.6-i386-netinst.iso
-#isoname=debian-6.0.6-i386-netinst.iso
-#
 # Location where VM's dir will be created.
 basedir=$SCRIPT_DIR/../machines
-
-## Download ISO file
-#cd ~/downloads
-#wget $isolink --output-document=$isoname
-#
-## Location of source image (ISO) file.
-#isopath=~/downloads/$isoname
 
 # Start the install...
 cd $basedir/..
@@ -164,9 +145,12 @@ if [[ -n $VMDK ]]; then
             mv $basedir/$VMNAME/*.vmdk $basedir/$VMNAME/$VMNAME.vmdk
             mv $basedir/$VMNAME/*.vmx $basedir/$VMNAME/$VMNAME.vmx
             VMDK=$VMNAME.vmdk
+
+            # Parse the memory size out of the vmx file.
             vmx=$basedir/$VMNAME/$VMNAME.vmx
             memsize="`awk '/memsize = "[0-9]+"/{print $3}' $vmx`"
             memsize=$(echo $memsize | sed "s/\"//g")
+            # Done with the vmx file. Clear it out.
             rm $vmx
             echo "Modifying memory size to match VMDK: $memsize MB";
             VBoxManage modifyvm $VMNAME --memory $memsize
@@ -181,8 +165,9 @@ if [[ -n $VMDK ]]; then
     VBoxManage storageattach $VMNAME --storagectl "SATA Controller" --port 0 --device 0 --type hdd --medium $basedir/$VMNAME/$VMDK
 fi
 
-# Attach the ISO as a DVD Drive so we can boot from it.
-#VBoxManage storageattach test --storagectl "IDE Controller" --port 0 --device 1 --type dvddrive --medium $isopath
-
 # Let's see what info VBox has on the new VM...
 VBoxManage showvminfo $VMNAME
+
+echo "";
+echo "$VMNAME has been created."
+echo "The machine data is located at $basedir/$VMNAME"

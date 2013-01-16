@@ -154,12 +154,19 @@ Create a new VM
             -n VMNAME   Name of VM to create
             -s MEMSIZE  Size of memory in MB
             -d HDSIZE   Size of HD in MB
-            -t OSTYPE   Type of OS (Linux, Windows)
+            -t OSTYPE   Type of OS (Linux, Windows7)
             -v VMDKNAME Name of VMDK to use in place of HD
 
         Options not provided as arguments will be requested.
 
+You can see a list of available OS types by running `VBoxManage list ostypes`.
 
+
+#### vmvrde
+
+Turn VRDE On or Off for a VM.
+
+    Usage: vmvrde VMNAME  on|off
 
 
 License
