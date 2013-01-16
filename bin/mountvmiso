@@ -1,0 +1,52 @@
+#!/bin/bash
+# Mount an ISO file as a DVD/CD
+
+SCRIPT_DIR="$( cd "$( dirname $(readlink -f "${BASH_SOURCE[0]}") )" && pwd )"
+isosdir=$SCRIPT_DIR/../isos
+
+usage() {
+cat <<EOF
+Usage: mountvmiso  VM_NAME  ISO_PATH | none
+
+    Mount an ISO file as a DVD/CD
+
+    If 'none' is passed for the ISO_PATH, the ISO will be unmounted.
+
+EOF
+}
+
+vmname=$1
+isopath=$2
+
+# Check for proper number of args.
+expected_args=2
+if [ $# -lt $expected_args ]
+then
+    usage
+    exit 1
+fi
+
+
+# Set up the iso location if there's one
+if [[ -n $isopath ]] && [ "$isopath" != "none" ]; then
+    if [[ ! -f $isopath ]]; then
+        if [[ ! -f $isosdir/$isopath ]]; then
+            echo "Unable to find $isopath";
+            echo "Does not exist in $isosdir either.";
+            echo "Aborting.";
+            exit 1;
+        else
+            isopath=$isosdir/$isopath
+        fi
+    fi
+fi
+
+# Attach the ISO as a DVD Drive so we can boot from it
+# (or unmount if isopath == none).
+VBoxManage storageattach $vmname --storagectl "IDE Controller" --port 0 --device 1 --type dvddrive --medium $isopath
+
+if [ "$isopath" != "none" ]; then
+    echo "ISO Mounted";
+else
+    echo "ISO Unmounted";
+fi

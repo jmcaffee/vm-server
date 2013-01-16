@@ -1,0 +1,188 @@
+#!/bin/bash
+# Script to create a VBox VM.
+
+SCRIPT_DIR="$( cd "$( dirname $(readlink -f "${BASH_SOURCE[0]}") )" && pwd )"
+vmdksdir=$SCRIPT_DIR/../vmdks
+
+usage() {
+cat <<EOF
+Usage: createvm [OPTIONS]
+
+    Create a VM
+
+    OPTIONS:
+        -h          Show this help
+        -n VMNAME   Name of VM to create
+        -s MEMSIZE  Size of memory in MB
+        -d HDSIZE   Size of HD in MB
+        -t OSTYPE   Type of OS (Linux, Windows)
+        -v VMDKNAME Name of VMDK to use in place of HD
+
+    Options not provided as arguments will be requested.
+EOF
+}
+
+while getopts "hn:s:d:t:v:" OPTION
+do
+    case $OPTION in
+        h|\?)
+            usage
+            exit 1
+            ;;
+        n)
+            VMNAME=$OPTARG
+            ;;
+        s)
+            MEMSIZE=$OPTARG
+            ;;
+        d)
+            HDSIZE=$OPTARG
+            ;;
+        t)
+            SYSTYPE=$OPTARG
+            ;;
+        v)
+            VMDK=$OPTARG
+            ;;
+        ?)
+            usage
+            exit
+            ;;
+    esac
+done
+
+if [[ -z $VMNAME ]]; then
+    echo -n "Name of VM: "
+    read VMNAME
+    if [[ -z $VMNAME ]]; then
+        echo "Aborting. No VM name"
+        exit 1
+    fi
+fi
+
+if [[ -z $MEMSIZE ]]; then
+    MEMSIZE=512
+fi
+
+if [[ -z $HDSIZE ]]; then
+    HDSIZE=3000
+fi
+
+if [[ -z $SYSTYPE ]]; then
+    SYSTYPE=Linux
+fi
+
+if [[ -n $VMDK ]]; then
+    echo "VMDK specified. HD size will be disregarded"
+    HDSIZE=0
+fi
+
+settings() {
+    cat <<EOF
+
+Initial Settings
+----------------------
+
+VM:       $VMNAME
+RAM:      $MEMSIZE MB
+HDD Size: $HDSIZE MB
+OS Type:  $SYSTYPE
+VMDK:     $VMDK
+
+EOF
+}
+
+settings
+#exit 1
+
+## Modify these variables to customize your setup:
+#
+## Set vmname to the name of your new VM.
+#vmname=test
+#
+## VM HD size (in MB; 1000 = 1 GB)
+#hdsize=3000
+#
+## Link to ISO to download.
+#isolink=http://cdimage.debian.org/debian-cd/6.0.6/i386/iso-cd/debian-6.0.6-i386-netinst.iso
+#isoname=debian-6.0.6-i386-netinst.iso
+#
+# Location where VM's dir will be created.
+basedir=$SCRIPT_DIR/../machines
+
+## Download ISO file
+#cd ~/downloads
+#wget $isolink --output-document=$isoname
+#
+## Location of source image (ISO) file.
+#isopath=~/downloads/$isoname
+
+# Start the install...
+cd $basedir/..
+mkdir -p $basedir/$VMNAME
+
+# Create the VM...
+VBoxManage createvm --name $VMNAME --basefolder $basedir --ostype $SYSTYPE --register
+
+# Modify the VM settings...
+VBoxManage modifyvm $VMNAME --memory $MEMSIZE
+VBoxManage modifyvm $VMNAME --pae on
+VBoxManage modifyvm $VMNAME --nic1 bridged
+VBoxManage modifyvm $VMNAME --bridgeadapter1 eth0
+VBoxManage modifyvm $VMNAME --vrde on
+
+# Set up the storate controllers...
+VBoxManage storagectl $VMNAME --name "IDE Controller" --add ide --bootable on
+VBoxManage storagectl $VMNAME --name "SATA Controller" --add sata --bootable on --controller IntelAhci
+
+# Create a HD for the VM... if there's no VMDK
+if [[ -z $VMDK ]]; then
+    cd $basedir/$VMNAME/
+    VBoxManage createhd --filename "$VMNAME.vdi" --size $HDSIZE
+    cd $basedir/..
+
+    # Attach the HD to the storage controller we created...
+    VBoxManage storageattach $VMNAME --storagectl "SATA Controller" --port 0 --device 0 --type hdd --medium $basedir/$VMNAME/$VMNAME.vdi
+fi
+
+# Set up the VMDK if there's one
+if [[ -n $VMDK ]]; then
+    cd $basedir/$VMNAME/
+    if [[ ! -f $VMDK ]]; then
+        if [[ ! -f $vmdksdir/$VMDK ]]; then
+            echo "Unable to find $VMDK";
+            echo "Does not exist in $vmdksdir either.";
+            echo "Aborting.";
+            exit 1;
+        fi
+
+        VMDK=$vmdksdir/$VMDK
+    fi
+    case $VMDK in
+        *.zip)
+            unzip -j $VMDK -d $basedir/$VMNAME
+            mv $basedir/$VMNAME/*.vmdk $basedir/$VMNAME/$VMNAME.vmdk
+            mv $basedir/$VMNAME/*.vmx $basedir/$VMNAME/$VMNAME.vmx
+            VMDK=$VMNAME.vmdk
+            vmx=$basedir/$VMNAME/$VMNAME.vmx
+            memsize="`awk '/memsize = "[0-9]+"/{print $3}' $vmx`"
+            memsize=$(echo $memsize | sed "s/\"//g")
+            rm $vmx
+            echo "Modifying memory size to match VMDK: $memsize MB";
+            VBoxManage modifyvm $VMNAME --memory $memsize
+            ;;
+        *)
+            cp $VMDK $basedir/$VMNAME/
+            ;;
+    esac
+
+
+    # Attach the HD to the storage controller we created...
+    VBoxManage storageattach $VMNAME --storagectl "SATA Controller" --port 0 --device 0 --type hdd --medium $basedir/$VMNAME/$VMDK
+fi
+
+# Attach the ISO as a DVD Drive so we can boot from it.
+#VBoxManage storageattach test --storagectl "IDE Controller" --port 0 --device 1 --type dvddrive --medium $isopath
+
+# Let's see what info VBox has on the new VM...
+VBoxManage showvminfo $VMNAME
