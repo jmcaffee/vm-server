@@ -118,12 +118,12 @@ Move a VM to another location (directory)
           If you want a vm named 'test' to end up in the '/machines/test' dir,
           then you should use '/machines' as the dest dir.
     
-     WARNING!
-     Moving VMs that contain snapshots IS NOT SUPPORTED!
-     You should merge your snapshots before moving the VM.
-     As always, it's a _really, really good idea_ to back them up first.
+**WARNING!**
+Moving VMs that contain snapshots IS NOT SUPPORTED!
+You should merge your snapshots before moving the VM.
+As always, it's a _really, really good idea_ to back them up first.
 
-__How it works:__
+**How it works:**
 
 + Clone the VM to /tmp/move-VMNAME
 + Delete the original VM (so we can reuse the name)
