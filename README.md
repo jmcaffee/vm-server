@@ -131,6 +131,33 @@ As always, it's a _really, really good idea_ to back them up first.
 + Delete /tmp/move-VMNAME
     
 
+#### mountvmiso
+
+Mount/unmount an ISO image as a DVD/CD
+
+    Usage: mountvmiso  VM_NAME  ISO_PATH | none
+
+        Mount an ISO file as a DVD/CD
+
+        If 'none' is passed for the ISO_PATH, the ISO will be unmounted.
+
+#### createvm
+
+Create a new VM
+
+    Usage: createvm [OPTIONS]
+
+        Create a VM
+
+        OPTIONS:
+            -h          Show this help
+            -n VMNAME   Name of VM to create
+            -s MEMSIZE  Size of memory in MB
+            -d HDSIZE   Size of HD in MB
+            -t OSTYPE   Type of OS (Linux, Windows)
+            -v VMDKNAME Name of VMDK to use in place of HD
+
+        Options not provided as arguments will be requested.
 
 
 
