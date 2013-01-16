@@ -7,10 +7,11 @@ Install
 -------
 
 Clone this repo.
+Read-only:
 
         $ git clone git://github.com/jmcaffee/vm-server.git
 
-or
+or Read-Write:
 
         $ git clone git@github.com:jmcaffee/vm-server.git
 
@@ -23,6 +24,20 @@ Run `bin/install.run` as `sudo` or `root` to create helpful links in `/usr/local
         $ sudo ./bin/install.run
 
 Profit!
+
+Summary
+-------
+
+These scripts/commands help moderate/maintain a VirtualBox Headless server
+running on Ubuntu/Debian.
+
+Within the root directory of this project a number of directories are
+created:
+
++ machines - where the VMs are located
++ isos     - keep your OS image files here
++ vmdks    - got VMDKs? Keep them here
++ bin      - all of the commands, and the un/install scripts
 
 License
 -------
