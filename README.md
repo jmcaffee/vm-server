@@ -1,17 +1,18 @@
 vm-server
 =========
 
-Helper scripts for running/maintaining a Virtual Box VM server.
+Helper scripts for running/maintaining a Headless Virtual Box VM server.
 
 Install
 -------
 
-Clone this repo.
-Read-only:
+Clone or fork this repo.
+
+Git Read-Only:
 
         $ git clone git://github.com/jmcaffee/vm-server.git
 
-or Read-Write:
+or SSH:
 
         $ git clone git@github.com:jmcaffee/vm-server.git
 
@@ -19,9 +20,12 @@ Change into the directory.
 
         $ cd vm-server
 
-Run `bin/install.run` as `sudo` or `root` to create helpful links in `/usr/local/bin`.
+Run `bin/install.run` as `sudo` or `root`.
 
         $ sudo ./bin/install.run
+
+The installer simply creates links to each script in your `/usr/local/bin` directory.
+The uninstaller removes the links.
 
 Profit!
 
@@ -90,8 +94,7 @@ Stop a running VM
 
 Delete a registered VM
 
-    Usage:"
-        deletevm VMNAME"
+    Usage: deletevm VMNAME
 
 #### clonevm
 
@@ -107,7 +110,7 @@ Clone a stopped VM
 
 Move a VM to another location (directory)
 
-    Usage: clonevm  SRC_VM_NAME  DEST_DIR_ROOT
+    Usage: movevm  SRC_VM_NAME  DEST_DIR_ROOT
     
       Surround VM name in quotes if it contains spaces.
       DEST_DIR_ROOT should NOT include the VM's dir name.
@@ -118,6 +121,14 @@ Move a VM to another location (directory)
      WARNING!
      Moving VMs that contain snapshots IS NOT SUPPORTED!
      You should merge your snapshots before moving the VM.
+     As always, it's a _really, really good idea_ to back them up first.
+
+__How it works:__
+
++ Clone the VM to /tmp/move-VMNAME
++ Delete the original VM (so we can reuse the name)
++ Clone /tmp/move-VMNAME to new location
++ Delete /tmp/move-VMNAME
     
 
 

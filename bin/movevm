@@ -15,7 +15,7 @@ srcvm=$1
 destdir=$2
 
 usage() {
-    echo "Usage: clonevm  SRC_VM_NAME  DEST_DIR_ROOT";
+    echo "Usage: movevm  SRC_VM_NAME  DEST_DIR_ROOT";
     echo "";
     echo "  Surround VM name in quotes if it contains spaces.";
     echo "  DEST_DIR_ROOT should NOT include the VM's dir name.";
