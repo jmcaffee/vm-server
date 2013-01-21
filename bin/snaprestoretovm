@@ -1,0 +1,56 @@
+#
+# Restore VM to a specific snapshot
+#
+
+SCRIPT_DIR="$( cd "$( dirname $(readlink -f "${BASH_SOURCE[0]}") )" && pwd )"
+
+
+srcvm=$1
+snapname=$2
+vmdir=../machines
+basefolder=${SCRIPT_DIR}/$vmdir
+
+usage() {
+cat <<USAGE
+Usage: snaprestoretovm VMNAME SNAPSHOT_NAME
+
+    Restore a VM to a specific snapshot
+
+USAGE
+}
+
+
+pause_vm() {
+
+    res=$(VBoxManage list runningvms | grep -iw "$srcvm")
+    if [ -n "$res" ]; then
+        VBoxManage controlvm $srcvm pause
+        vm_paused=1
+    fi
+}
+
+start_vm() {
+    if [[ $vm_paused == 1 ]]; then
+        VBoxManage controlvm $srcvm resume
+    fi
+}
+
+
+# Check for proper number of args.
+required_args=2
+if [ $# -lt $required_args ]
+then
+    usage
+    exit 1
+fi
+
+pause_vm
+
+if ( (VBoxManage snapshot $srcvm restore "$snapname") ); then
+    echo "VM rolled back to $snapname snapshot"
+else
+    echo "There was a problem. Unable to rollback."
+fi
+
+start_vm
+

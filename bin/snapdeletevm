@@ -1,0 +1,62 @@
+#
+# Delete a VM's snapshot
+#
+
+SCRIPT_DIR="$( cd "$( dirname $(readlink -f "${BASH_SOURCE[0]}") )" && pwd )"
+
+
+srcvm=$1
+snapname=$2
+vmdir=../machines
+basefolder=${SCRIPT_DIR}/$vmdir
+
+usage() {
+cat <<USAGE
+Usage: snapdeletevm VMNAME SNAPSHOT_NAME
+
+    Delete a VM's snapshot
+
+    NOTE!
+        This deletes the specified snapshot and merges its differences into
+        any children it may have.
+
+    SNAPSHOT_NAME: name of snapshot.
+
+USAGE
+}
+
+
+pause_vm() {
+
+    res=$(VBoxManage list runningvms | grep -iw "$srcvm")
+    if [ -n "$res" ]; then
+        VBoxManage controlvm $srcvm pause
+        vm_paused=1
+    fi
+}
+
+start_vm() {
+    if [[ $vm_paused == 1 ]]; then
+        VBoxManage controlvm $srcvm resume
+    fi
+}
+
+
+# Check for proper number of args.
+required_args=2
+if [ $# -lt $required_args ]
+then
+    usage
+    exit 1
+fi
+
+pause_vm
+
+if ( (VBoxManage snapshot $srcvm delete "$snapname") ); then
+    echo "Snapshot deleted ($snapname)"
+else
+    echo "There was a problem. Unable to delete snapshot."
+fi
+
+start_vm
+

@@ -1,0 +1,19 @@
+#!/bin/bash
+
+SCRIPT_DIR="$( cd "$( dirname $(readlink -f "${BASH_SOURCE[0]}") )" && pwd )"
+
+echo "VM-SERVER COMMANDS"
+echo "=================="
+dirstr=$SCRIPT_DIR/
+echo "";
+for f in $SCRIPT_DIR/*
+do
+    if [[ $f != *.run ]]; then
+        if [[ $f != *.out ]]; then
+            echo "${f/$dirstr/}"
+        fi
+    fi
+done
+
+echo "";
+

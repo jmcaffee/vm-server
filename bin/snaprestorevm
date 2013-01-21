@@ -1,0 +1,53 @@
+#
+# Restore VM to the current snapshot
+#
+
+SCRIPT_DIR="$( cd "$( dirname $(readlink -f "${BASH_SOURCE[0]}") )" && pwd )"
+
+
+srcvm=$1
+vmdir=../machines
+basefolder=${SCRIPT_DIR}/$vmdir
+
+usage() {
+cat <<USAGE
+Usage: snaprestorevm VMNAME
+
+    Restore a VM to the last snapshot
+
+    NOTE!
+        Any changes since the last snapshot will be lost!
+
+USAGE
+}
+
+
+stop_vm() {
+
+    res=$(VBoxManage list runningvms | grep -iw "$srcvm")
+    if [ -n "$res" ]; then
+        echo "Powering off VM!";
+        VBoxManage controlvm $srcvm poweroff
+        vm_stopped=1
+    fi
+}
+
+
+# Check for proper number of args.
+required_args=1
+if [ $# -lt $required_args ]
+then
+    usage
+    exit 1
+fi
+
+stop_vm
+
+if ( (VBoxManage snapshot $srcvm restorecurrent) ); then
+    echo "VM rolled back to most recent snapshot";
+    echo "You will need to restart your VM (startvm)";
+else
+    echo "There was a problem. Unable to rollback."
+fi
+
+

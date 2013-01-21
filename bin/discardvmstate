@@ -1,0 +1,32 @@
+#
+# Discard all saved VM state
+#
+
+SCRIPT_DIR="$( cd "$( dirname $(readlink -f "${BASH_SOURCE[0]}") )" && pwd )"
+
+
+srcvm=$1
+vmdir=../machines
+basefolder=${SCRIPT_DIR}/$vmdir
+
+usage() {
+cat <<USAGE
+Usage: discardvmstate VMNAME
+
+    Discard all saved VM state.
+    This can be used to recover when your *.sav files are corrupted.
+
+USAGE
+}
+
+
+# Check for proper number of args.
+required_args=1
+if [ $# -lt $required_args ]
+then
+    usage
+    exit 1
+fi
+
+VBoxManage discardstate $srcvm
+

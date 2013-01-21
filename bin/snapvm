@@ -1,0 +1,61 @@
+#
+# Take a snapshot of a VM
+#
+
+SCRIPT_DIR="$( cd "$( dirname $(readlink -f "${BASH_SOURCE[0]}") )" && pwd )"
+
+
+srcvm=$1
+vmdir=../machines
+basefolder=${SCRIPT_DIR}/$vmdir
+
+usage() {
+cat <<USAGE
+Usage: snapvm VMNAME [ SNAPSHOT_NAME ]
+
+    Take a snapshot of a VM
+
+    SNAPSHOT_NAME: (optional) name of snapshot. Default: snapshot-YYYY-MM-DD
+
+USAGE
+}
+
+
+pause_vm() {
+
+    res=$(VBoxManage list runningvms | grep -iw "$srcvm")
+    if [ -n "$res" ]; then
+        VBoxManage controlvm $srcvm pause
+        vm_paused=1
+    fi
+}
+
+start_vm() {
+    if [[ $vm_paused == 1 ]]; then
+        VBoxManage controlvm $srcvm resume
+    fi
+}
+
+
+# Check for proper number of args.
+required_args=1
+if [ $# -lt $required_args ]
+then
+    usage
+    exit 1
+fi
+
+dt=$( date +%Y-%m-%d )
+dt_name="snapshot-$dt"
+snapname=${2:-$dt_name}     # Default to 'snapshot-YYYY-MM-DD'
+
+pause_vm
+
+if ( (VBoxManage snapshot $srcvm take $snapname) ); then
+    echo "SNAP! Saved as $snapname"
+else
+    echo "There was a problem. Unable to take snapshot."
+fi
+
+start_vm
+
